@@ -1,0 +1,85 @@
+{
+  "generated_at": "2025-05-03 20:00:01",
+  "data": [
+    {
+      "script": [
+        {
+          "bullet": "Trump says he's 'taking away' Harvard's tax exempt status - ABC News",
+          "emotion": "neutral"
+        }
+      ]
+    },
+    {
+      "script": [
+        {
+          "bullet": "Grand Theft Auto VI release delayed to May 2026 - The Verge",
+          "emotion": "neutral"
+        },
+        {
+          "bullet": "Rockstar Games is delaying the release of Grand Theft Auto VI to May 26th, 2026. The developer says it needs more time to focus on the quality of the game.",
+          "emotion": "neutral"
+        },
+        {
+          "bullet": "Rockstar Games says it needs more time to deliver the quality you expect and deserve.",
+          "emotion": "neutral"
+        },
+        {
+          "bullet": "Rockstar Games says it needs more time to deliver the quality you expect and deserve.",
+          "emotion": "neutral"
+        }
+      ]
+    },
+    {
+      "script": [
+        {
+          "bullet": "Berkshire investors hope for Buffett's guidance at annual meeting with tariffs shaking markets, economy - CNBC",
+          "emotion": "neutral"
+        },
+        {
+          "bullet": "Buffett's annual gathering in the Cornhusker State comes as the investment climate turned less certain thanks to President Trump's aggressive tariff regime.",
+          "emotion": "neutral"
+        },
+        {
+          "bullet": "Warren Buffett has been mum about tariffs and the recent market turmoil, but will finally speak his mind when the 94-year-old investment legend kicks off Berkshire Hathaway's annual shareholder meeti… [+4135 chars]",
+          "emotion": "neutral"
+        }
+      ]
+    },
+    {
+      "script": [
+        {
+          "bullet": "Temu abandons Chinese imports to US as tariffs force overhaul - Financial Times",
+          "emotion": "neutral"
+        },
+        {
+          "bullet": "Ecommerce company to source all US products from local merchants as ‘de minimis’ tax loophole closed",
+          "emotion": "neutral"
+        },
+        {
+          "bullet": "Complete digital access to quality analysis and expert insights, complemented with our award-winning Weekend Print edition.",
+          "emotion": "happy"
+        },
+        {
+          "bullet": "<ul><li></li>Everything in Print<li></li>Weekday Print Edition<li></li>FT … [+202 chars]",
+          "emotion": "neutral"
+        }
+      ]
+    },
+    {
+      "script": [
+        {
+          "bullet": "Israeli military strikes near Syria’s presidential palace after warning over sectarian attacks - AP News",
+          "emotion": "angry"
+        },
+        {
+          "bullet": "Israel’s air force has struck near Syria’s presidential palace hours after warning Syrian authorities not to march toward villages inhabited by members of a minority sect in southern Syria. The strike on Friday came after days of clashes near the capital betw…",
+          "emotion": "neutral"
+        },
+        {
+          "bullet": "DAMASCUS, Syria (AP) Israels air force struck near Syrias presidential palace early Friday after warning Syrian authorities not to march toward villages inhabited by members of a minority sect in sou… [+4717 chars]",
+          "emotion": "neutral"
+        }
+      ]
+    }
+  ]
+}
