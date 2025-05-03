@@ -23,7 +23,7 @@ dist-ssr
 *.sln
 *.sw?
 
-.venv/
+.myenv/
 .env
 
 firebase_adminsdk.json
