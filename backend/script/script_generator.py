@@ -4,7 +4,7 @@ import json
 from datetime import datetime
 from apscheduler.schedulers.blocking import BlockingScheduler
 
-API_KEY = "bf8c0775624140f2ab2e6571932861cd"
+API_KEY = os.getenv("API_KEY")
 NEWS_API_URL = "https://newsapi.org/v2/top-headlines"
 COUNTRY = "us"  # Change to 'pk' for Pakistani/Urdu news
 
