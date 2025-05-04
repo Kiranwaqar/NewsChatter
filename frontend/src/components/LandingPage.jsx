@@ -7,10 +7,10 @@ import {
   Center,
 } from "@react-three/drei";
 import * as THREE from "three";
-import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
-import NewsCategories from "./NewsCategories"; // Import the new component
-import NewsService from "./NewsService"; // Import the news service
+import NewsCategories from "./NewsCategories";
+import NewsService from "./NewsService";
 import LanguageSelector from "./LanguageSelector";
+import NewsVoiceService from "./NewsVoiceService";
 
 // Avatar component that handles the 3D model and animations
 const Avatar = ({ speaking, currentViseme }) => {
@@ -18,7 +18,7 @@ const Avatar = ({ speaking, currentViseme }) => {
   // Preload the model as part of the component instead of waiting
   const { scene, animations } = useGLTF(
     "https://models.readyplayer.me/681629408ab2ab92492f09bf.glb",
-    true // Add true to prioritize loading
+    true
   );
   useAnimations(animations, modelRef);
 
@@ -195,6 +195,7 @@ const NewsControls = ({
   isSpeaking,
   setIsSpeaking,
   isLoading,
+  language,
 }) => {
   return (
     <div className="absolute bottom-8 left-8 right-8 bg-black bg-opacity-70 p-4 rounded-lg">
@@ -220,7 +221,33 @@ const NewsControls = ({
             ? "Loading..."
             : isSpeaking
             ? "Stop"
-            : "Start Broadcasting"}
+            : `Start Broadcasting in ${
+                language === "en"
+                  ? "English"
+                  : language === "es"
+                  ? "Spanish"
+                  : language === "fr"
+                  ? "French"
+                  : language === "de"
+                  ? "German"
+                  : language === "it"
+                  ? "Italian"
+                  : language === "zh-CN"
+                  ? "Chinese"
+                  : language === "ja"
+                  ? "Japanese"
+                  : language === "ko"
+                  ? "Korean"
+                  : language === "ar"
+                  ? "Arabic"
+                  : language === "ru"
+                  ? "Russian"
+                  : language === "hi"
+                  ? "Hindi"
+                  : language === "ur"
+                  ? "Urdu"
+                  : "Selected Language"
+              }`}
         </button>
 
         <div className="text-gray-300 text-sm italic">
@@ -233,16 +260,22 @@ const NewsControls = ({
   );
 };
 
-// Speech synthesis and lip sync controller
-const useSpeechSynthesis = (text, isSpeaking, setIsSpeaking) => {
+// Enhanced Speech Synthesis with language support and lip sync
+const useSpeechSynthesis = (
+  text,
+  isSpeaking,
+  setIsSpeaking,
+  language,
+  customAudioUrl
+) => {
   const [currentViseme, setCurrentViseme] = useState(0);
 
   const speechRef = useRef(null);
+  const audioRef = useRef(null);
   const visemeTimersRef = useRef([]);
   const animationRef = useRef(null);
   const speechEndedRef = useRef(false);
 
-  // Clear all timers and animation frames on cleanup
   const clearAllTimers = () => {
     visemeTimersRef.current.forEach((timer) => clearTimeout(timer));
     visemeTimersRef.current = [];
@@ -251,53 +284,48 @@ const useSpeechSynthesis = (text, isSpeaking, setIsSpeaking) => {
       cancelAnimationFrame(animationRef.current);
       animationRef.current = null;
     }
+
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+      audioRef.current = null;
+    }
   };
 
-  // Estimate speech duration based on text length
   const estimateSpeechDuration = (text) => {
-    // Average speaking rate is about 150 words per minute or 2.5 words per second
-    // This gives us about 400ms per word on average for news reading
     const words = text.split(/\s+/).filter((word) => word.length > 0);
-    return words.length * 400; // milliseconds
+    return words.length * 400;
   };
 
-  // Generate continuous viseme animation pattern with better synchronization
   const startContinuousVisemeAnimation = () => {
     let lastVisemeTime = Date.now();
     let currentPattern = 0;
     let lastSyllableTime = Date.now();
     let syllableCount = 0;
 
-    // Analysis of text to determine syllable count and rhythm (rough estimate)
-    const syllablesPerSecond = 3.5; // Average speech rate for news
+    const syllablesPerSecond = 3.5;
 
-    // Enhanced viseme patterns for better synchronization
     const patterns = [
-      [1, 3, 2, 0, 1], // Pattern 1 - Common mouth movements
-      [2, 1, 4, 0, 2], // Pattern 2 - Wider mouth movements
-      [3, 1, 0, 2, 1], // Pattern 3 - Intense movements
-      [4, 2, 1, 0, 4], // Pattern 4 - O shapes and round sounds
-      [1, 2, 1, 0, 1], // Pattern 5 - Subtle movements
-      [2, 3, 4, 2, 0], // Pattern 6 - Complex sequence
+      [1, 3, 2, 0, 1],
+      [2, 1, 4, 0, 2],
+      [3, 1, 0, 2, 1],
+      [4, 2, 1, 0, 4],
+      [1, 2, 1, 0, 1],
+      [2, 3, 4, 2, 0],
     ];
 
     const animate = () => {
       const now = Date.now();
 
-      // Use syllable timing to better match natural speech
-      // A typical news anchor speaks at about 3-4 syllables/second
       const syllableDuration = 1000 / syllablesPerSecond;
-      const rhythmVariation = syllableDuration * 0.3; // Natural variation
+      const rhythmVariation = syllableDuration * 0.3;
 
-      // Change viseme on a more natural speech rhythm
-      // Use shorter timings (100-180ms) for more responsive lip sync
       if (now - lastVisemeTime > 100 + Math.random() * 80) {
         const pattern = patterns[currentPattern % patterns.length];
         const visemeIndex = Math.floor(syllableCount % pattern.length);
 
         setCurrentViseme(pattern[visemeIndex]);
 
-        // Track syllable counts for more natural speech patterns
         if (
           now - lastSyllableTime >
           syllableDuration -
@@ -307,7 +335,6 @@ const useSpeechSynthesis = (text, isSpeaking, setIsSpeaking) => {
           syllableCount++;
           lastSyllableTime = now;
 
-          // Change patterns more naturally based on syllable boundaries
           if (syllableCount % 8 === 0) {
             currentPattern = (currentPattern + 1) % patterns.length;
           }
@@ -316,82 +343,97 @@ const useSpeechSynthesis = (text, isSpeaking, setIsSpeaking) => {
         lastVisemeTime = now;
       }
 
-      // Continue animation if still speaking
       if (isSpeaking && !speechEndedRef.current) {
         animationRef.current = requestAnimationFrame(animate);
       } else {
-        // Reset to closed mouth when done
         setCurrentViseme(0);
       }
     };
 
-    // Start animation loop
     animationRef.current = requestAnimationFrame(animate);
   };
 
   useEffect(() => {
-    // Clear previous timers and animations
     clearAllTimers();
     speechEndedRef.current = false;
 
     if (isSpeaking && text) {
       const speechDuration = estimateSpeechDuration(text);
 
-      // Start speech synthesis if available
-      if ("speechSynthesis" in window) {
-        window.speechSynthesis.cancel(); // Cancel any ongoing speech
+      if (customAudioUrl) {
+        audioRef.current = new Audio(customAudioUrl);
+
+        audioRef.current.onended = () => {
+          speechEndedRef.current = true;
+          setTimeout(() => {
+            setIsSpeaking(false);
+            setCurrentViseme(0);
+          }, 300);
+        };
+
+        audioRef.current.onerror = () => {
+          console.error("Error playing translated audio");
+          speechEndedRef.current = true;
+          setIsSpeaking(false);
+          setCurrentViseme(0);
+        };
+
+        audioRef.current.play().catch((err) => {
+          console.error("Error playing translated audio:", err);
+          speechEndedRef.current = true;
+          setIsSpeaking(false);
+        });
+
+        const endTimer = setTimeout(() => {
+          if (isSpeaking) {
+            speechEndedRef.current = true;
+            setIsSpeaking(false);
+          }
+        }, Math.max(speechDuration * 1.5, 30000));
+
+        visemeTimersRef.current.push(endTimer);
+      } else if ("speechSynthesis" in window) {
+        window.speechSynthesis.cancel();
 
         speechRef.current = new SpeechSynthesisUtterance(text);
 
-        // Better voice parameters for news reading and improved lip sync
-        speechRef.current.rate = 0.85; // Slightly slower for news reading and better sync
+        speechRef.current.rate = 0.85;
         speechRef.current.pitch = 1.0;
         speechRef.current.volume = 1.0;
 
-        // Attempt to use a better quality voice if available
+        if (language) {
+          speechRef.current.lang = language === "ur" ? "ur-PK" : language;
+        }
+
         const voices = window.speechSynthesis.getVoices();
         const preferredVoices = voices.filter(
           (voice) =>
-            voice.name.includes("Premium") ||
-            voice.name.includes("Enhanced") ||
-            voice.name.includes("Neural")
+            (language ? voice.lang.startsWith(language.split("-")[0]) : true) &&
+            (voice.name.includes("Premium") ||
+              voice.name.includes("Enhanced") ||
+              voice.name.includes("Neural"))
         );
 
         if (preferredVoices.length > 0) {
           speechRef.current.voice = preferredVoices[0];
         }
 
-        // Create and use utterance boundary event listener for precise lip sync
-        // Some browsers support this for more accurate word timing
-        speechRef.current.onboundary = (event) => {
-          if (event.name === "word") {
-            // Word boundaries can be used to synchronize mouth movements
-            // This helps with the "still moving after speech ended" problem
-            // by providing more precise timing info
-          }
-        };
-
-        // Handle speech end reliably
         speechRef.current.onend = () => {
           speechEndedRef.current = true;
-          // Small delay to ensure the last words are fully animated
           setTimeout(() => {
             setIsSpeaking(false);
             setCurrentViseme(0);
-          }, 300); // Shortened to reduce "still talking" effect
+          }, 300);
         };
 
-        // More accurate backup timer with periodic checks
         const endTimer = setTimeout(() => {
           if (isSpeaking) {
             speechEndedRef.current = true;
             setIsSpeaking(false);
           }
-        }, speechDuration + 1500); // Reduced buffer time for better sync at end
+        }, speechDuration + 1500);
 
-        // Add additional check near expected end of speech
         const preEndCheck = setTimeout(() => {
-          // Check if browser believes speech is still happening
           if (!window.speechSynthesis.speaking) {
             speechEndedRef.current = true;
             setIsSpeaking(false);
@@ -404,10 +446,8 @@ const useSpeechSynthesis = (text, isSpeaking, setIsSpeaking) => {
           window.speechSynthesis.speak(speechRef.current);
         } catch (error) {
           console.error("Speech synthesis error:", error);
-          // Fallback to just visual animation if speech fails
         }
       } else {
-        // If speech synthesis is not available, use timed animation
         const endTimer = setTimeout(() => {
           speechEndedRef.current = true;
           setIsSpeaking(false);
@@ -416,13 +456,17 @@ const useSpeechSynthesis = (text, isSpeaking, setIsSpeaking) => {
         visemeTimersRef.current.push(endTimer);
       }
 
-      // Start continuous lip sync animation
       startContinuousVisemeAnimation();
     } else {
-      // Cancel speech if stopped manually
       if ("speechSynthesis" in window) {
         window.speechSynthesis.cancel();
       }
+
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current.currentTime = 0;
+      }
+
       speechEndedRef.current = true;
       setCurrentViseme(0);
     }
@@ -432,15 +476,32 @@ const useSpeechSynthesis = (text, isSpeaking, setIsSpeaking) => {
       if ("speechSynthesis" in window) {
         window.speechSynthesis.cancel();
       }
+
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current.currentTime = 0;
+      }
     };
-  }, [isSpeaking, text]);
+  }, [isSpeaking, text, language, customAudioUrl]);
 
   return { currentViseme };
 };
 
 // Main News Avatar Scene component
-const NewsAvatarScene = ({ text, isSpeaking, setIsSpeaking }) => {
-  const { currentViseme } = useSpeechSynthesis(text, isSpeaking, setIsSpeaking);
+const NewsAvatarScene = ({
+  text,
+  isSpeaking,
+  setIsSpeaking,
+  language,
+  customAudioUrl,
+}) => {
+  const { currentViseme } = useSpeechSynthesis(
+    text,
+    isSpeaking,
+    setIsSpeaking,
+    language,
+    customAudioUrl
+  );
   const controlsRef = useRef();
 
   // Set focus on face when component mounts
@@ -516,11 +577,12 @@ const NewsAvatarScene = ({ text, isSpeaking, setIsSpeaking }) => {
 
 // Main LandingPage component
 export default function LandingPage() {
-  const [newsText, setNewsText] = useState();
+  const [newsText, setNewsText] = useState("");
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [isLoading, setIsLoading] = useState(false);
   const [language, setLanguage] = useState("en");
+  const [audioUrl, setAudioUrl] = useState(null);
 
   // Preload the 3D model before rendering the page
   useGLTF.preload("https://models.readyplayer.me/681629408ab2ab92492f09bf.glb");
@@ -537,6 +599,7 @@ export default function LandingPage() {
           selectedCategory
         );
         setNewsText(newsContent);
+        setAudioUrl(null); // Reset audio URL when category changes
       } catch (error) {
         console.error("Error fetching news:", error);
         setNewsText(
@@ -550,18 +613,50 @@ export default function LandingPage() {
     fetchNews();
   }, [selectedCategory]);
 
+  // Effect to handle language changes
   useEffect(() => {
-    if (!isSpeaking) return;
-    if ("speechSynthesis" in window) {
-      window.speechSynthesis.cancel();
-      const utterance = new SpeechSynthesisUtterance(newsText);
-      utterance.lang = language === "ur" ? "ur-PK" : "en-US";
-      utterance.rate = 0.85;
-      utterance.pitch = 1.0;
-      utterance.volume = 1.0;
-      window.speechSynthesis.speak(utterance);
+    // Reset audio URL when language changes
+    setAudioUrl(null);
+
+    // If currently speaking, stop speaking when language changes
+    if (isSpeaking) {
+      setIsSpeaking(false);
+
+      // Cancel any ongoing speech
+      if ("speechSynthesis" in window) {
+        window.speechSynthesis.cancel();
+      }
     }
-  }, [language, isSpeaking]);
+  }, [language]);
+
+  // Effect to prepare translated audio when broadcast is started
+  useEffect(() => {
+    const prepareAudio = async () => {
+      if (isSpeaking && language !== "en" && !audioUrl) {
+        try {
+          setIsLoading(true);
+          const result = await NewsVoiceService.getTranslatedNewsAudio(
+            selectedCategory,
+            language
+          );
+
+          if (result && result.audioUrl) {
+            setAudioUrl(result.audioUrl);
+          } else {
+            console.error("No audio URL found in the translation service");
+            // Optionally, set fallback audio or handle errors
+          }
+        } catch (error) {
+          console.error("Error preparing translated audio:", error);
+          setAudioUrl(null); // Fallback to default or browser speech synthesis
+        } finally {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    prepareAudio();
+  }, [isSpeaking, language, selectedCategory, audioUrl]);
 
   // Current category display
   const getCategoryLabel = () => {
@@ -575,7 +670,6 @@ export default function LandingPage() {
       <div className="absolute top-4 right-4 z-50">
         <LanguageSelector language={language} onLanguageChange={setLanguage} />
       </div>
-
       <NewsCategories
         selectedCategory={selectedCategory}
         setSelectedCategory={setSelectedCategory}
