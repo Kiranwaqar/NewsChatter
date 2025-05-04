@@ -195,7 +195,6 @@ const NewsControls = ({
   isSpeaking,
   setIsSpeaking,
   isLoading,
-  language,
 }) => {
   return (
     <div className="absolute bottom-8 left-8 right-8 bg-black bg-opacity-70 p-4 rounded-lg">
@@ -217,37 +216,7 @@ const NewsControls = ({
           onClick={() => setIsSpeaking(!isSpeaking)}
           disabled={isLoading}
         >
-          {isLoading
-            ? "Loading..."
-            : isSpeaking
-            ? "Stop"
-            : `Start Broadcasting in ${
-                language === "en"
-                  ? "English"
-                  : language === "es"
-                  ? "Spanish"
-                  : language === "fr"
-                  ? "French"
-                  : language === "de"
-                  ? "German"
-                  : language === "it"
-                  ? "Italian"
-                  : language === "zh-CN"
-                  ? "Chinese"
-                  : language === "ja"
-                  ? "Japanese"
-                  : language === "ko"
-                  ? "Korean"
-                  : language === "ar"
-                  ? "Arabic"
-                  : language === "ru"
-                  ? "Russian"
-                  : language === "hi"
-                  ? "Hindi"
-                  : language === "ur"
-                  ? "Urdu"
-                  : "Selected Language"
-              }`}
+          {isSpeaking ? "Stop" : "Start Broadcasting"}
         </button>
 
         <div className="text-gray-300 text-sm italic">
@@ -318,7 +287,7 @@ const useSpeechSynthesis = (
       const now = Date.now();
 
       const syllableDuration = 1000 / syllablesPerSecond;
-      const rhythmVariation = syllableDuration * 0.3;
+      const rhythmVariation = syllableDuration * 0.1;
 
       if (now - lastVisemeTime > 100 + Math.random() * 80) {
         const pattern = patterns[currentPattern % patterns.length];

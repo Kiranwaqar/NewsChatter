@@ -3,20 +3,7 @@ import React from "react";
 
 const LanguageSelector = ({ language, onLanguageChange }) => {
   // Enhanced language options with appropriate language codes
-  const languages = [
-    { code: "en", name: "English" },
-    { code: "es", name: "Spanish" },
-    { code: "fr", name: "French" },
-    { code: "de", name: "German" },
-    { code: "it", name: "Italian" },
-    { code: "zh-CN", name: "Chinese" },
-    { code: "ja", name: "Japanese" },
-    { code: "ko", name: "Korean" },
-    { code: "ar", name: "Arabic" },
-    { code: "ru", name: "Russian" },
-    { code: "hi", name: "Hindi" },
-    { code: "ur", name: "Urdu" },
-  ];
+  const languages = [{ code: "en", name: "English" }];
 
   return (
     <div className="flex items-center bg-black bg-opacity-70 p-2 rounded-lg shadow-lg">
