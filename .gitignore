@@ -23,7 +23,9 @@ dist-ssr
 *.sln
 *.sw?
 
-.myenv/
+myenv/
+
+
 .env
 
 firebase_adminsdk.json
