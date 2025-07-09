@@ -162,12 +162,6 @@ Contributions are welcome! Please fork the repository, create a feature branch, 
 
 ---
 
-## 📜 License
-
-This project is licensed under the [MIT License](LICENSE).
-
----
-
 ## 🌐 Links
 
 * **API Documentation**: [News API Docs](https://newsapi.org/docs)
@@ -175,4 +169,4 @@ This project is licensed under the [MIT License](LICENSE).
 
 ---
 
-Let me know if there are additional details you'd like to include! 😊
+
